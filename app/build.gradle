@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.limzikiki.demola"
-        minSdk 21
+        minSdk 23
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -78,10 +78,19 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
 
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+
+
     // DJI SDK
     implementation('com.dji:dji-sdk:4.15', {
         exclude module: 'library-anti-distortion'
     })
     implementation 'com.mapzen.android:lost:3.0.4'
     compileOnly 'com.dji:dji-sdk-provided:4.15'
+
+    // Other
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+
 }

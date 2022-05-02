@@ -15,9 +15,39 @@
         android:theme="@style/Theme.Demola"
         tools:targetApi="31">
         <activity
+            android:name=".DataReceiverActivity"
+            android:exported="false"
+            android:label="@string/title_activity_data_receiver"
+            android:theme="@style/Theme.Demola" />
+
+        <uses-library android:name="com.android.future.usb.accessory" />
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <meta-data
+            android:name="com.dji.sdk.API_KEY"
+            android:value="9581cb23155c7ed0ef8e67c8" />
+
+        <service
+            android:name="com.mapzen.android.lost.internal.GeofencingIntentService"
+            android:exported="true"
+            tools:node="merge" />
+        <service
+            android:name="dji.sdk.sdkmanager.DJIGlobalService"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".DataSenderActivity"
+            android:exported="false"
+            android:label="@string/title_activity_data_sender"
+            android:theme="@style/Theme.Demola" />
+        <activity
             android:name=".MainActivity"
+            android:configChanges="orientation"
             android:exported="true"
             android:label="@string/app_name"
+            android:screenOrientation="landscape"
             android:theme="@style/Theme.Demola">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,12 +55,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name="com.mapzen.android.lost.internal.GeofencingIntentService"
-            android:exported="true"
-            tools:node="merge">
-
-        </service>
     </application>
 
 </manifest>

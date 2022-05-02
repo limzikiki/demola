@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">demola</string>
+    <string name="title_activity_data_sender">DataSenderActivity</string>
+    <string name="title_activity_data_receiver">DataReceiverActivity</string>
 </resources>
