@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.sp
 import com.limzikiki.demola.ui.theme.DemolaTheme
 
 @Composable
-fun Loading() {
+fun LoadingScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -29,8 +29,8 @@ fun Loading() {
 
 @Preview
 @Composable
-fun LoadingScreen() {
+private fun LoadingScreenPreview() {
     DemolaTheme {
-        Loading()
+        LoadingScreen()
     }
 }

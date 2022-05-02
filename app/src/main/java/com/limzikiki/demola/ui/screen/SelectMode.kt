@@ -1,6 +1,7 @@
 package com.limzikiki.demola.ui.screen
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,43 +15,52 @@ import com.limzikiki.demola.ui.theme.DemolaTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.limzikiki.demola.DataReceiverActivity
+import com.limzikiki.demola.DataSenderActivity
 
 fun navigateToReceiver(ctx: Context) {
     TODO()
 }
 
 fun startSender(ctx: Context) {
-    // TODO:
+    val intent = Intent(ctx, DataSenderActivity::class.java)
+    ctx.startActivity(intent)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectMode() {
     val ctx = LocalContext.current
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Card(modifier = Modifier
             .fillMaxHeight()
-            .width(180.dp)
+            .weight(1f)
+            .fillMaxWidth(1f)
+            .padding(4.dp)
             .clickable { navigateToReceiver(ctx) }
-            .padding(4.dp)) {
+            ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Data Receiver")
+                Text("Start Receiving Data")
             }
         }
         Spacer(modifier = Modifier.width(4.dp))
         Card(modifier = Modifier
             .fillMaxHeight()
-            .width(180.dp)
+            .weight(1f)
+            .fillMaxWidth(1f)
+            .padding(4.dp)
             .clickable { startSender(ctx) }
-            .padding(4.dp)) {
+           ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.Center,

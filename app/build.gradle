@@ -92,5 +92,6 @@ dependencies {
 
     // Other
     implementation 'com.jakewharton.timber:timber:5.0.1'
+    implementation "com.google.accompanist:accompanist-permissions:0.24.7-alpha"
 
 }
