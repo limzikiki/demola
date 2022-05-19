@@ -1,14 +1,13 @@
 package com.limzikiki.demola
 
-import android.Manifest
 import android.content.Context
 import com.secneo.sdk.Helper
 import timber.log.Timber
 
-class Application: android.app.Application() {
+class MApplication: android.app.Application() {
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
-        Helper.install(this@Application)
+        Helper.install(this@MApplication)
     }
 
     override fun onCreate() {

@@ -1,6 +1,11 @@
 package com.limzikiki.demola.state
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.compose.runtime.*
+import androidx.core.content.ContextCompat
 import dji.common.error.DJIError
 import dji.common.error.DJISDKError
 import dji.sdk.base.BaseComponent
@@ -8,11 +13,12 @@ import dji.sdk.base.BaseProduct
 import dji.sdk.sdkmanager.DJISDKInitEvent
 import dji.sdk.sdkmanager.DJISDKManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Stable
 class DJIState(val coroutine: CoroutineScope) {
-    private var _loading = mutableStateOf(true)
+    private var _loading = mutableStateOf(false)
     val loading: State<Boolean>
         get() = _loading
 
@@ -20,19 +26,19 @@ class DJIState(val coroutine: CoroutineScope) {
     val loadingState: State<Float>
         get() = _loadingState
 
-    private var _connected =  mutableStateOf(false)
-    val connected: State<Boolean>
-        get() = _connected
-
-    private var _registered =  mutableStateOf(false)
+    private var _registered = mutableStateOf(false)
     val registered: State<Boolean>
         get() = _registered
+
+    private var _connected = mutableStateOf(false)
+    val connected: State<Boolean>
+        get() = _connected
 
     private var _product: BaseProduct? = null
     private val product: BaseProduct?
         get() {
-            synchronized(this){
-                if(_product == null){
+            synchronized(this) {
+                if (_product == null) {
                     _product = DJISDKManager.getInstance().product
                 }
                 return _product
@@ -43,36 +49,68 @@ class DJIState(val coroutine: CoroutineScope) {
     init {
         _connected.value = product?.isConnected == true
 
-        if(connected.value){
+        if (connected.value) {
             _registered.value = true
-            _loading.value = true
+            _loading.value = false
         }
     }
 
-    fun registerSDKListener(){
+    /**
+     * @return false if sdk wasn't attempted to start because of lack of the permissions.
+     * */
+    fun registerSDKListener(ctx: Context): Boolean {
 
+        val permissionCheck = ContextCompat.checkSelfPermission(
+            ctx,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        val permissionCheck2 = ContextCompat.checkSelfPermission(
+            ctx,
+            Manifest.permission.READ_PHONE_STATE
+        )
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED ||
+            permissionCheck2 != PackageManager.PERMISSION_GRANTED
+        ) {
+            return false
+        }
+        Timber.i("Attempt to register app")
+        val reg = DJISDKManager.getInstance().hasSDKRegistered()
+        if (!reg)
+            coroutine.launch {
+                Toast.makeText(ctx,"Registering DJI", Toast.LENGTH_SHORT).show()
+                try{
+                    DJISDKManager.getInstance().registerApp(ctx, DJISDKManagerCallback)
+                }catch (error: Exception){
+                    Timber.e(error)
+                }
+            }
+        _loading.value = true
+        _connected.value = false
+        _registered.value = false
+        return true
     }
 
 
-    val DJISDKManagerCallback = object : DJISDKManager.SDKManagerCallback{
+    @Suppress("PrivatePropertyName")
+    private val DJISDKManagerCallback = object : DJISDKManager.SDKManagerCallback {
         override fun onRegister(error: DJIError?) {
-            when(error){
-                DJISDKError.REGISTRATION_SUCCESS ->{
+            when (error) {
+                DJISDKError.REGISTRATION_SUCCESS -> {
                     Timber.i("DJI SDK was registered successfully")
 
-                    with(this@DJIState){
+                    with(this@DJIState) {
                         _loading.value = false
-                        _connected.value = true
+                        _registered.value = true
                     }
                     // Start connection to the drone
                     DJISDKManager.getInstance().startConnectionToProduct()
 
                 }
-                else->{
+                else -> {
                     Timber.e("Unknown error ${error?.errorCode ?: "NULL"}: ${error?.description ?: "NULL"} ")
-                    with(this@DJIState){
+                    with(this@DJIState) {
                         _loading.value = false
-                        _connected.value = false
+                        _registered.value = false
                     }
                 }
             }
@@ -104,8 +142,8 @@ class DJIState(val coroutine: CoroutineScope) {
         }
 
         override fun onDatabaseDownloadProgress(current: Long, total: Long) {
-            if(((current/ total) * 100L) % 10L == 0L)
-                Timber.i("Flight Map database downloading ${(current/ total) * 100}")
+            if (((current / total) * 100L) % 10L == 0L)
+                Timber.i("Flight Map database downloading ${(current / total) * 100}")
         }
 
     }
@@ -114,6 +152,6 @@ class DJIState(val coroutine: CoroutineScope) {
 
 
 @Composable
-fun rememberDJIState(coroutine: CoroutineScope = rememberCoroutineScope()) = remember(coroutine){
+fun rememberDJIState(coroutine: CoroutineScope = rememberCoroutineScope()) = remember(coroutine) {
     DJIState(coroutine)
 }
