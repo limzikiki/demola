@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.core.content.ContextCompat
 import dji.common.error.DJIError
 import dji.common.error.DJISDKError
+import dji.common.util.CommonCallbacks
 import dji.sdk.base.BaseComponent
 import dji.sdk.base.BaseProduct
 import dji.sdk.sdkmanager.DJISDKInitEvent
@@ -15,9 +16,10 @@ import dji.sdk.sdkmanager.DJISDKManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import kotlin.reflect.typeOf
 
 @Stable
-class DJIState(val coroutine: CoroutineScope) {
+class DJIState(private val coroutine: CoroutineScope) {
     private var _loading = mutableStateOf(false)
     val loading: State<Boolean>
         get() = _loading
@@ -34,12 +36,21 @@ class DJIState(val coroutine: CoroutineScope) {
     val connected: State<Boolean>
         get() = _connected
 
+    private var _sending = mutableStateOf(false)
+    val sending: State<Boolean>
+        get() = _sending
+
+    private var _lastSentData = mutableStateOf<String?>(null)
+    val lastSentData: State<String?>
+        get() = _lastSentData
+
     private var _product: BaseProduct? = null
     private val product: BaseProduct?
         get() {
             synchronized(this) {
                 if (_product == null) {
                     _product = DJISDKManager.getInstance().product
+                    _connected.value = _product != null
                 }
                 return _product
             }
@@ -84,15 +95,54 @@ class DJIState(val coroutine: CoroutineScope) {
                     Timber.e(error)
                 }
             }
+        else{
+            _loading.value = false
+            _registered.value = true
+        }
         _loading.value = true
         _connected.value = false
         _registered.value = false
         return true
     }
 
+    fun checkConnection(ctx: Context){
+        if(product?.isConnected == true){
+            Toast.makeText(ctx, "Product is connected", Toast.LENGTH_SHORT).show()
+        }else{
+            if(product == null){
+                Toast.makeText(ctx, "Product is null", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(ctx, "Product is not connected", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
-    @Suppress("PrivatePropertyName")
-    private val DJISDKManagerCallback = object : DJISDKManager.SDKManagerCallback {
+    fun startSendingData(){
+        TODO()
+    }
+
+    /**
+     * Prepares required data for sending
+     */
+    private fun initSending(){
+
+    }
+
+    /**
+     * Отправляет дату в формате который ты сам выберешь, желательно текст или интерфейс с данными
+     */
+    private fun sendData(data: Any?){
+        TODO("Arsenii need to implement")
+    }
+
+    /**
+     * Проверяет подключен ли телефон и можно ли с ним обмениваться информацией.
+     */
+    private fun canConnect(){
+        TODO("Arsenii need to implement")
+    }
+
+    val DJISDKManagerCallback = object : DJISDKManager.SDKManagerCallback {
         override fun onRegister(error: DJIError?) {
             when (error) {
                 DJISDKError.REGISTRATION_SUCCESS -> {
@@ -104,7 +154,6 @@ class DJIState(val coroutine: CoroutineScope) {
                     }
                     // Start connection to the drone
                     DJISDKManager.getInstance().startConnectionToProduct()
-
                 }
                 else -> {
                     Timber.e("Unknown error ${error?.errorCode ?: "NULL"}: ${error?.description ?: "NULL"} ")
@@ -120,8 +169,9 @@ class DJIState(val coroutine: CoroutineScope) {
             Timber.e("Product got disconnected")
         }
 
-        override fun onProductConnect(product: BaseProduct?) {
-            Timber.i("Product got disconnected")
+        override fun onProductConnect(product1: BaseProduct?) {
+            Timber.i("Product got connected")
+            product
         }
 
         override fun onProductChanged(product: BaseProduct?) {
@@ -146,6 +196,19 @@ class DJIState(val coroutine: CoroutineScope) {
                 Timber.i("Flight Map database downloading ${(current / total) * 100}")
         }
 
+    }
+
+}
+
+val cb = object: CommonCallbacks.CompletionCallbackWith<String>{
+    override fun onSuccess(name: String?) {
+        Timber.i("Product $name got connected")
+    }
+
+    override fun onFailure(p0: DJIError?) {
+        if (p0 != null) {
+            Timber.e(p0.description)
+        }
     }
 
 }

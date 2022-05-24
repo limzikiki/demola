@@ -1,6 +1,8 @@
 package com.limzikiki.demola.ui.screen
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,8 +46,21 @@ fun DataSenderStartScreen(){
                     djiState.registerSDKListener(ctx)
                 }
             }else{
-                Text("Registered")
+                Column(){
+                    Text("Registered")
+                    if(! djiState.connected.value){
+                        Text("Not connected")
+                        Button(onClick = { djiState.checkConnection(ctx) }) {
+                            Text("Check product")
+                        }
+                    }else{
+                        Text("Connected")
+                    }
+
+                }
+
             }
         }
     }
 }
+
