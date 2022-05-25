@@ -11,14 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.limzikiki.demola.state.DJIState
 import com.limzikiki.demola.state.rememberDJIState
 import com.limzikiki.demola.ui.component.DataSenderCard
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun DataSenderStartScreen(){
+fun DataSenderScreen(){
     val permissions = rememberMultiplePermissionsState(permissions = Permissions.DJI)
     if(!permissions.allPermissionsGranted){
         RequestPermissionsScreen(permissions)
@@ -48,8 +46,11 @@ fun DataSenderStartScreen(){
                     djiState.registerSDKListener(ctx)
                 }
             }else{
-                Column(){
+                Column{
                     Text("Registered")
+                    if (djiState.message.value.isNotEmpty()){
+                        Text(djiState.message.value)
+                    }
                     if(! djiState.connected.value){
                         Text("Not connected")
                         Button(onClick = { djiState.checkConnection(ctx) }) {

@@ -53,12 +53,16 @@ class DJIState(private val coroutine: CoroutineScope) {
     val message: State<String>
         get() = _message
 
-    private var _product: BaseProduct? = null
-    private val product: BaseProduct?
+    private var _product: Aircraft? = null
+    private val product: Aircraft?
         get() {
             synchronized(this) {
                 if (_product == null) {
-                    _product = DJISDKManager.getInstance().product
+                    val temp = DJISDKManager.getInstance().product
+                    if(temp is Aircraft)
+                        _product = temp
+                    else
+                        _message.value = "You have connected not a drone"
                     _connected.value = _product != null
                 }
                 return _product
@@ -140,9 +144,10 @@ class DJIState(private val coroutine: CoroutineScope) {
         }
     }
 
-    fun cancelSending(){
+    fun stopSending(){
         _sending.value = false
         sendingJob?.cancel()
+        sendingJob = null
     }
 
     /**
@@ -151,8 +156,17 @@ class DJIState(private val coroutine: CoroutineScope) {
     private suspend fun initSending() {
         while(true){
             delay(1000)
+            updateData()
             _lastSentData.value = dataToSend.toString()
             sendData()
+        }
+    }
+
+    private fun updateData(){
+        val tempProd = product ?: return;
+        tempProd.flightController.run {
+            dataToSend.altitude = state.aircraftLocation.altitude
+            dataToSend.flightTime = state.flightTimeInSeconds
         }
     }
 
@@ -205,7 +219,6 @@ class DJIState(private val coroutine: CoroutineScope) {
 
             product?.battery?.setStateCallback {
                 dataToSend.batteryLevel = it.chargeRemainingInPercent
-                dataToSend.batteryLifetimeRemaining = it.lifetimeRemaining
             }
         }
 

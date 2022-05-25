@@ -1,5 +1,6 @@
 package com.limzikiki.demola.ui.component
 
+import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -33,15 +34,14 @@ fun DataSenderCard(state: DJIState?) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Wrap(errorStyle: Boolean = false, child: @Composable ColumnScope.() -> Unit) {
-    val cardColors =
-        CardDefaults.cardColors(containerColor = if (errorStyle) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.background)
-    Card(
+    Surface(
         modifier = Modifier
             .padding(4.dp),
-        colors = cardColors
+        shape = MaterialTheme.shapes.medium,
+        shadowElevation = 4.dp,
+        color = if (errorStyle) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
@@ -74,6 +74,9 @@ private fun RawDataSenderCard(state: DJIState?) {
             state?.lastSentData?.value ?: "Nothing was sent yet",
             fontFamily = FontFamily.Monospace
         )
+        Button(onClick = {state?.stopSending()}) {
+            Text("Stop Sending Data")
+        }
     }
 }
 

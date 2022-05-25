@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.limzikiki.demola.ui.screen.DataReceiverScreen
 import com.limzikiki.demola.ui.theme.DemolaTheme
 
 class DataReceiverActivity : ComponentActivity() {
@@ -17,27 +18,8 @@ class DataReceiverActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             DemolaTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting2("Android")
-                }
+                DataReceiverScreen()
             }
         }
-    }
-}
-
-@Composable
-fun Greeting2(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview2() {
-    DemolaTheme {
-        Greeting2("Android")
     }
 }
