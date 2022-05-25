@@ -179,7 +179,7 @@ class DJIState(private val coroutine: CoroutineScope) {
     }
 
     /**
-     * Проверяет подключен ли телефон и можно ли с ним обмениваться информацией. Если нет, то информация появиться в меседж
+     * Проверяет подключен ли телефон и можно ли с ним обмениваться информацией. Если нет, то информация появиться в [_message]
      */
     private fun canConnect():Boolean {
         _message.value = "Reason why can't connect"
