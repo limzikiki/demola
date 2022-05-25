@@ -3,19 +3,24 @@ package com.limzikiki.demola.state
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.core.content.ContextCompat
+import com.limzikiki.demola.TransmittableData
 import dji.common.error.DJIError
 import dji.common.error.DJISDKError
 import dji.common.util.CommonCallbacks
 import dji.sdk.base.BaseComponent
 import dji.sdk.base.BaseProduct
+import dji.sdk.products.Aircraft
 import dji.sdk.sdkmanager.DJISDKInitEvent
 import dji.sdk.sdkmanager.DJISDKManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import org.bouncycastle.jcajce.provider.symmetric.ARC4.Base
 import timber.log.Timber
+import java.util.*
 import kotlin.reflect.typeOf
 
 @Stable
@@ -44,6 +49,10 @@ class DJIState(private val coroutine: CoroutineScope) {
     val lastSentData: State<String?>
         get() = _lastSentData
 
+    private var _message = mutableStateOf("")
+    val message: State<String>
+        get() = _message
+
     private var _product: BaseProduct? = null
     private val product: BaseProduct?
         get() {
@@ -56,7 +65,8 @@ class DJIState(private val coroutine: CoroutineScope) {
             }
         }
 
-
+    private var sendingJob: Job? = null
+    private var dataToSend = TransmittableData()
     init {
         _connected.value = product?.isConnected == true
 
@@ -88,14 +98,14 @@ class DJIState(private val coroutine: CoroutineScope) {
         val reg = DJISDKManager.getInstance().hasSDKRegistered()
         if (!reg)
             coroutine.launch {
-                Toast.makeText(ctx,"Registering DJI", Toast.LENGTH_SHORT).show()
-                try{
+                Toast.makeText(ctx, "Registering DJI", Toast.LENGTH_SHORT).show()
+                try {
                     DJISDKManager.getInstance().registerApp(ctx, DJISDKManagerCallback)
-                }catch (error: Exception){
+                } catch (error: Exception) {
                     Timber.e(error)
                 }
             }
-        else{
+        else {
             _loading.value = false
             _registered.value = true
         }
@@ -105,40 +115,61 @@ class DJIState(private val coroutine: CoroutineScope) {
         return true
     }
 
-    fun checkConnection(ctx: Context){
-        if(product?.isConnected == true){
+    fun checkConnection(ctx: Context) {
+        if (product?.isConnected == true) {
             Toast.makeText(ctx, "Product is connected", Toast.LENGTH_SHORT).show()
-        }else{
-            if(product == null){
+        } else {
+            if (product == null) {
                 Toast.makeText(ctx, "Product is null", Toast.LENGTH_SHORT).show()
-            }else{
+            } else {
                 Toast.makeText(ctx, "Product is not connected", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    fun startSendingData(){
-        TODO()
+    /**
+     * When sending fails error message will be in [DJIState.message]
+     */
+    fun startSendingData() {
+        if(!canConnect()){
+            return
+        }
+        _sending.value = true
+        sendingJob = coroutine.launch {
+            initSending()
+        }
+    }
+
+    fun cancelSending(){
+        _sending.value = false
+        sendingJob?.cancel()
     }
 
     /**
-     * Prepares required data for sending
+     * Prepares required data for sending.
      */
-    private fun initSending(){
-
+    private suspend fun initSending() {
+        while(true){
+            delay(1000)
+            _lastSentData.value = dataToSend.toString()
+            sendData()
+        }
     }
 
     /**
-     * Отправляет дату в формате который ты сам выберешь, желательно текст или интерфейс с данными
+     * Отправляет дату в формате [TransmittableData] беря ее из [dataToSend] и отправляет ее на другой телефон
      */
-    private fun sendData(data: Any?){
+    private fun sendData() {
+
         TODO("Arsenii need to implement")
     }
 
     /**
-     * Проверяет подключен ли телефон и можно ли с ним обмениваться информацией.
+     * Проверяет подключен ли телефон и можно ли с ним обмениваться информацией. Если нет, то информация появиться в меседж
      */
-    private fun canConnect(){
+    private fun canConnect():Boolean {
+        _message.value = "Reason why can't connect"
+
         TODO("Arsenii need to implement")
     }
 
@@ -171,7 +202,11 @@ class DJIState(private val coroutine: CoroutineScope) {
 
         override fun onProductConnect(product1: BaseProduct?) {
             Timber.i("Product got connected")
-            product
+
+            product?.battery?.setStateCallback {
+                dataToSend.batteryLevel = it.chargeRemainingInPercent
+                dataToSend.batteryLifetimeRemaining = it.lifetimeRemaining
+            }
         }
 
         override fun onProductChanged(product: BaseProduct?) {
@@ -196,19 +231,6 @@ class DJIState(private val coroutine: CoroutineScope) {
                 Timber.i("Flight Map database downloading ${(current / total) * 100}")
         }
 
-    }
-
-}
-
-val cb = object: CommonCallbacks.CompletionCallbackWith<String>{
-    override fun onSuccess(name: String?) {
-        Timber.i("Product $name got connected")
-    }
-
-    override fun onFailure(p0: DJIError?) {
-        if (p0 != null) {
-            Timber.e(p0.description)
-        }
     }
 
 }
