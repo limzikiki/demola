@@ -19,7 +19,8 @@ import com.limzikiki.demola.DataReceiverActivity
 import com.limzikiki.demola.DataSenderActivity
 
 fun navigateToReceiver(ctx: Context) {
-    TODO()
+    val intent = Intent(ctx, DataReceiverActivity::class.java)
+    ctx.startActivity(intent)
 }
 
 fun startSender(ctx: Context) {
