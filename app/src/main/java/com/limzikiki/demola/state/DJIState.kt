@@ -1,6 +1,8 @@
 package com.limzikiki.demola.state
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Handler
@@ -15,11 +17,13 @@ import dji.common.util.CommonCallbacks
 import dji.sdk.base.BaseComponent
 import dji.sdk.base.BaseProduct
 import dji.sdk.products.Aircraft
+import dji.sdk.sdkmanager.BluetoothDevice
 import dji.sdk.sdkmanager.DJISDKInitEvent
 import dji.sdk.sdkmanager.DJISDKManager
 import kotlinx.coroutines.*
 import org.bouncycastle.jcajce.provider.symmetric.ARC4.Base
 import timber.log.Timber
+import java.sql.Types.NULL
 import java.util.*
 import kotlin.reflect.typeOf
 
@@ -80,6 +84,8 @@ class DJIState(private val coroutine: CoroutineScope) {
         }
     }
 
+    private var bluetoothAdapter:BluetoothAdapter? = null
+
     /**
      * @return false if sdk wasn't attempted to start because of lack of the permissions.
      * */
@@ -131,6 +137,8 @@ class DJIState(private val coroutine: CoroutineScope) {
         }
     }
 
+
+
     /**
      * When sending fails error message will be in [DJIState.message]
      */
@@ -170,11 +178,22 @@ class DJIState(private val coroutine: CoroutineScope) {
         }
     }
 
+
+    private fun discoverDevices(ctx: Context){
+        val BTManager:BluetoothManager = ctx.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothAdapter = BTManager.adapter
+
+        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+        pairedDevices?.forEach { device ->
+            val deviceName = device.name
+            val deviceHardwareAddress = device.address // MAC address
+        }
+    }
+
     /**
      * Отправляет дату в формате [TransmittableData] беря ее из [dataToSend] и отправляет ее на другой телефон
      */
     private fun sendData(ctx: Context) {
-
         TODO("Arsenii need to implement")
     }
 

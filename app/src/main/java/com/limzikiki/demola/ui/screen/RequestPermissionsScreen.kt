@@ -2,6 +2,8 @@
 package com.limzikiki.demola.ui.screen
 
 import android.Manifest
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +67,8 @@ object Permissions{
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.READ_PHONE_STATE,
     )
+    @RequiresApi(Build.VERSION_CODES.S)
     val receiver: List<String> = arrayListOf(
-        //TODO("Add required permissions")
+        Manifest.permission.BLUETOOTH_CONNECT,
     )
 }
