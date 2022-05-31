@@ -17,7 +17,7 @@ import com.limzikiki.demola.ui.component.DataSenderCard
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DataSenderScreen(){
-    val permissions = rememberMultiplePermissionsState(permissions = Permissions.DJI)
+    val permissions = rememberMultiplePermissionsState(permissions = Permissions.sender)
     if(!permissions.allPermissionsGranted){
         RequestPermissionsScreen(permissions)
         return

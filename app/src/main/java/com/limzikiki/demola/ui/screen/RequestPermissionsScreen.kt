@@ -1,44 +1,56 @@
+
 package com.limzikiki.demola.ui.screen
 
 import android.Manifest
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.limzikiki.demola.ui.theme.DemolaTheme
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun RequestPermissionsScreen(state: MultiplePermissionsState = rememberMultiplePermissionsState(
-    permissions = listOf()
-)){
+fun RequestPermissionsScreen(state: MultiplePermissionsState? = null){
     Column(
         Modifier
             .padding(4.dp)
             .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
         Text("It's required to have some permissions that you didn't grant yet", color = MaterialTheme.colorScheme.primary)
         Column {
-            for(permission in state.revokedPermissions){
-                Text(permission.permission, style=MaterialTheme.typography.titleMedium)
+            state?.let {
+                for(permission in state.revokedPermissions){
+                    Text(permission.permission, style=MaterialTheme.typography.titleMedium)
+                }
             }
         }
-        Button(onClick = {state.launchMultiplePermissionRequest() }) {
+        Button(onClick = {state?.launchMultiplePermissionRequest() }) {
             Text(text = "Grant")
         }
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+@Preview
+private fun PreviewRequestPermissionsScreen(){
+    DemolaTheme {
+        Surface(Modifier.fillMaxSize()) {
+            RequestPermissionsScreen()
+        }
+    }
+}
+
+
 object Permissions{
-    val DJI: List<String> = arrayListOf(
+    val sender: List<String> = arrayListOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
         Manifest.permission.VIBRATE,
