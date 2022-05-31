@@ -66,6 +66,6 @@ object Permissions{
         Manifest.permission.READ_PHONE_STATE,
     )
     val receiver: List<String> = arrayListOf(
-        TODO("Add required permissions")
+        //TODO("Add required permissions")
     )
 }

@@ -1,5 +1,6 @@
 package com.limzikiki.demola.state
 
+import android.content.Context
 import androidx.compose.runtime.*
 import kotlinx.coroutines.CoroutineScope
 
@@ -22,7 +23,7 @@ class DataReceiverState(private val coroutine: CoroutineScope) {
     val flightTime: State<Int>
         get() = _flightTime
 
-    fun startReceiving(){
+    fun startReceiving(ctx: Context){
         // To mark this device as ready to receive
         _receiving.value = true
         TODO("Arsenii implement")

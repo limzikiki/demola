@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,8 +66,9 @@ private fun RawDataSenderCard(state: DJIState?) {
     val isSending by state?.sending ?: remember {
         mutableStateOf(true)
     }
+    val ctx = LocalContext.current
     if (!isSending) {
-        Button(onClick = { state?.startSendingData() }) {
+        Button(onClick = { state?.startSendingData(ctx) }) {
             Text("Start Sending data")
         }
     } else {

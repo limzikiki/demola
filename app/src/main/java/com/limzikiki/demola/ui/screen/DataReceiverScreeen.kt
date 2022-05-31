@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -25,6 +26,7 @@ fun DataReceiverScreen() {
         return
     }
     val state = rememberDataReceiverState()
+    val ctx = LocalContext.current
     Surface {
         Column(
             Modifier.fillMaxSize(),
@@ -32,7 +34,7 @@ fun DataReceiverScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (!state.receiving.value) {
-                Button({ state.startReceiving() }) {
+                Button({ state.startReceiving(ctx) }) {
                     Text("Start receiving data")
                 }
             } else {

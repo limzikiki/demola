@@ -134,13 +134,13 @@ class DJIState(private val coroutine: CoroutineScope) {
     /**
      * When sending fails error message will be in [DJIState.message]
      */
-    fun startSendingData() {
-        if(!canConnect()){
+    fun startSendingData(ctx: Context) {
+        if(!canConnect(ctx)){
             return
         }
         _sending.value = true
         sendingJob = coroutine.launch {
-            initSending()
+            initSending(ctx)
         }
     }
 
@@ -153,12 +153,12 @@ class DJIState(private val coroutine: CoroutineScope) {
     /**
      * Prepares required data for sending.
      */
-    private suspend fun initSending() {
+    private suspend fun initSending(ctx: Context) {
         while(true){
             delay(1000)
             updateData()
             _lastSentData.value = dataToSend.toString()
-            sendData()
+            sendData(ctx)
         }
     }
 
@@ -173,7 +173,7 @@ class DJIState(private val coroutine: CoroutineScope) {
     /**
      * Отправляет дату в формате [TransmittableData] беря ее из [dataToSend] и отправляет ее на другой телефон
      */
-    private fun sendData() {
+    private fun sendData(ctx: Context) {
 
         TODO("Arsenii need to implement")
     }
@@ -181,7 +181,7 @@ class DJIState(private val coroutine: CoroutineScope) {
     /**
      * Проверяет подключен ли телефон и можно ли с ним обмениваться информацией. Если нет, то информация появиться в [_message]
      */
-    private fun canConnect():Boolean {
+    private fun canConnect(ctx:Context):Boolean {
         _message.value = "Reason why can't connect"
 
         TODO("Arsenii need to implement")
