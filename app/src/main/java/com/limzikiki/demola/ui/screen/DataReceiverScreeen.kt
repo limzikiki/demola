@@ -10,12 +10,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.limzikiki.demola.state.*
 import com.limzikiki.demola.ui.theme.DemolaTheme
 
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DataReceiverScreen() {
+    val permissions = rememberMultiplePermissionsState(permissions = Permissions.receiver)
+    if(!permissions.allPermissionsGranted){
+        RequestPermissionsScreen(permissions)
+        return
+    }
     val state = rememberDataReceiverState()
     Surface {
         Column(

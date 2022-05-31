@@ -53,4 +53,7 @@ object Permissions{
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.READ_PHONE_STATE,
     )
+    val receiver: List<String> = arrayListOf(
+        TODO("Add required permissions")
+    )
 }
