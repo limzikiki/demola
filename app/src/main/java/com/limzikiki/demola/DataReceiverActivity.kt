@@ -18,7 +18,9 @@ class DataReceiverActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             DemolaTheme {
-                DataReceiverScreen()
+                DataReceiverScreen(
+
+                )
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.limzikiki.demola
 
 import android.content.Context
+import com.mapzen.lost.BuildConfig
 import com.secneo.sdk.Helper
 import timber.log.Timber
 
