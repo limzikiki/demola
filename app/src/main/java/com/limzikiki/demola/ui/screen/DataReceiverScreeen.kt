@@ -72,7 +72,7 @@ private fun DataReceiverDisplay(state: DataReceiverState) {
     )
 
     SideEffect {
-        systemUi.isStatusBarVisible = false
+        systemUi.isSystemBarsVisible = false
     }
 
 
