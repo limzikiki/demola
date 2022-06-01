@@ -1,12 +1,19 @@
 package com.limzikiki.demola.state
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.compose.runtime.*
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.limzikiki.demola.TransmittableData
 import dji.common.error.DJIError
@@ -58,12 +65,18 @@ class DJIState(private val coroutine: CoroutineScope) {
         get() {
             synchronized(this) {
                 if (_product == null) {
-                    val temp = DJISDKManager.getInstance().product
-                    if(temp is Aircraft)
-                        _product = temp
-                    else
-                        _message.value = "You have connected not a drone"
-                    _connected.value = _product != null
+                    try{
+                        val temp = DJISDKManager.getInstance().product
+                        if(temp is Aircraft)
+                            _product = temp
+                        else
+                            _message.value = "You have connected not a drone"
+                        _connected.value = _product != null
+                    }
+                    catch (e: NoClassDefFoundError){
+                        _message.value = "DJI GO4 is not installed"
+                    }
+
                 }
                 return _product
             }
@@ -71,6 +84,10 @@ class DJIState(private val coroutine: CoroutineScope) {
 
     private var sendingJob: Job? = null
     private var dataToSend = TransmittableData()
+    private var bluetoothManager: BluetoothManager? = null
+    private val bluetoothAdapter: BluetoothAdapter? by lazy {
+        bluetoothManager?.adapter
+    }
     init {
         _connected.value = product?.isConnected == true
 
@@ -144,10 +161,11 @@ class DJIState(private val coroutine: CoroutineScope) {
         }
     }
 
-    fun stopSending(){
+    fun stopSending(ctx: Context){
         _sending.value = false
         sendingJob?.cancel()
         sendingJob = null
+        ctx.unregisterReceiver(receiver)
     }
 
     /**
@@ -182,8 +200,20 @@ class DJIState(private val coroutine: CoroutineScope) {
      * Проверяет подключен ли телефон и можно ли с ним обмениваться информацией. Если нет, то информация появиться в [_message]
      */
     private fun canConnect(ctx:Context):Boolean {
-        _message.value = "Reason why can't connect"
+        bluetoothManager = ctx.getSystemService(BluetoothManager::class.java)
+        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+        ctx.registerReceiver(receiver, filter)
 
+        if (ActivityCompat.checkSelfPermission(
+                ctx,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            _message.value = "Not enough permissions"
+            return false
+        }
+
+        bluetoothAdapter?.startDiscovery()
         TODO("Arsenii need to implement")
     }
 
@@ -246,6 +276,29 @@ class DJIState(private val coroutine: CoroutineScope) {
 
     }
 
+    private val receiver = object: BroadcastReceiver(){
+        override fun onReceive(ctx: Context, intent: Intent) {
+            when(intent.action) {
+                BluetoothDevice.ACTION_FOUND -> {
+                    val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    try{
+                        val deviceName = device?.name
+                        _message.value = "Connecting to $deviceName"
+                    }
+                    catch (e: SecurityException){
+                        _message.value = "Can't connect, not all the required permissions were granted"
+                        return
+                    }
+
+                }
+            }
+        }
+    }
+
+    companion object{
+        const val key = "limzikiki"
+        const val UUID = "8042f780-08c8-4efb-a314-80d4559879dc"
+    }
 }
 
 

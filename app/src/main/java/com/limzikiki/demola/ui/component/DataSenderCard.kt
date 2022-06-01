@@ -76,7 +76,7 @@ private fun RawDataSenderCard(state: DJIState?) {
             state?.lastSentData?.value ?: "Nothing was sent yet",
             fontFamily = FontFamily.Monospace
         )
-        Button(onClick = {state?.stopSending()}) {
+        Button(onClick = {state?.stopSending(ctx)}) {
             Text("Stop Sending Data")
         }
     }
